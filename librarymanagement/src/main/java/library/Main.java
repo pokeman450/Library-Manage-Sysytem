@@ -89,7 +89,9 @@ public class Main {
                 System.out.println("2) View books");
                 System.out.println("3) View overdue Books");
                 System.out.println("4) Total fees");
-                System.out.println("5) exit");
+                System.out.println("5) Add Books");
+                System.out.println("6) Remove Books");
+                System.out.println("7) exit");
                 choice = scanner.nextInt();
                 scanner.nextLine();
                 switch(choice){
