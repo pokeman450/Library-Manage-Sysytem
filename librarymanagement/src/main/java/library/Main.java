@@ -8,11 +8,12 @@ public class Main {
     private static final String password = "maplestory";
     public static Scanner scanner = new Scanner(System.in);
     public static User user;
+    public static Connect connect;
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
 
         Class.forName("com.mysql.cj.jdbc.Driver");
-
+        connect = new Connect(url,username,password);
         boolean running = true;
 
         try(Connection connection = DriverManager.getConnection(url, username, password)) {
@@ -70,7 +71,7 @@ public class Main {
                 user.setUsername(resultSet.getString("username"));
                 user.setPassword(resultSet.getString("password"));
                 user.setRole(resultSet.getString("role"));
-                user.setUrl(url);
+
                 return user;
             }
         } catch (SQLException e) {
@@ -83,7 +84,7 @@ public class Main {
         //the choices if the user is an admin
         if(user.getRole().equals("librarian")){
             do{
-                System.out.println("librarian Menu:");
+                System.out.println("Librarian Menu:");
                 System.out.println("1) View checked out books");
                 System.out.println("2) View books");
                 System.out.println("3) View overdue Books");

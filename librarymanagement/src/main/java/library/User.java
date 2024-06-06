@@ -5,13 +5,9 @@ public class User {
     private String username;
     private String password;
     private String role;
-    private String url;
     public User() {
     }
 
-    public String getUrl() {return url;}
-
-    public void setUrl(String url) {this.url = url;}
 
     public int getId() {
         return id;
