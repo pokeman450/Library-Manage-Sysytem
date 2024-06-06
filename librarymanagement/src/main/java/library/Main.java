@@ -117,13 +117,15 @@ public class Main {
                 switch(choice){
                     case 1 ->viewCheckedOutBooks(connection, user.getId());
                     case 2 -> viewFees(connection, user.getId());
+                    case 3 -> checkoutBook(connection);
                 }
             } while (choice != 4);
         }
     }
 
     public static void viewCheckedOutBooks(Connection connection, int userId) {
-        String readQuery = "SELECT * FROM books WHERE userId = ?";
+        String readQuery = "SELECT * FROM books WHERE userId = ? AND books.checkout IS NOT NULL";
+        // Get all books that match userId with logged in user and checkout is not null
         try (PreparedStatement createStatement = connection.prepareStatement(readQuery)) {
             createStatement.setInt(1, userId);
 
@@ -176,6 +178,32 @@ public class Main {
         }
     }
 
+    public static void checkoutBook(Connection connection) {
+        System.out.println("Enter the book name to check out: ");
+        String bookName = scanner.nextLine();
+        String readQuery = "SELECT * FROM books WHERE name = ? AND userId IS NULL";
+        String updateQuery = "UPDATE books SET userId = ?, checkout = ? WHERE name = ? AND userId IS NULL";
 
+        try (PreparedStatement readStatement = connection.prepareStatement(readQuery)) {
+            readStatement.setString(1, bookName);
+            try (ResultSet resultSet = readStatement.executeQuery()) {
+                // Checks if book entered is available or exists
+                if (resultSet.next()) {
+                    try (PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
+                        // Updates book userId to logged in user and checkout date, time
+                        updateStatement.setInt(1, user.getId());
+                        updateStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                        updateStatement.setString(3, bookName);
+                        updateStatement.executeUpdate();
+                        System.out.println("Book checked out successfully!");
+                    }
+                } else {
+                    System.out.println("Book not available for checkout or does not exist.");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }
