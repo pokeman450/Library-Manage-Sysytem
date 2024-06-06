@@ -158,7 +158,7 @@ public class Main {
             createStatement.setInt(1, userId);
 
             try (ResultSet resultSet = createStatement.executeQuery()) {
-                if (resultSet.next() ) {
+                while (resultSet.next() ) {
                     if(resultSet.getTimestamp("checkout")!= null){
                         //if it is then we get the checkout datetime
                         LocalDateTime time = resultSet.getTimestamp("checkout").toLocalDateTime();
