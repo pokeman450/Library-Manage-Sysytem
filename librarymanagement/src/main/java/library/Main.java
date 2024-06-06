@@ -177,6 +177,8 @@ public class Main {
                     }
 
                 }
+                System.out.println("There were "+count+" late books.");
+                System.out.println("Total fee from all the late books are: "+totalFees+" dollars!");
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
