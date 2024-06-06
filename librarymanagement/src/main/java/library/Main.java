@@ -82,7 +82,7 @@ public class Main {
     public static void libraryMenu() throws SQLException, ClassNotFoundException {
         int choice = 0;
         //the choices if the user is an admin
-        if(user.getRole().equals("librarian")){
+            if(user.getRole().equals("librarian")){
             do{
                 System.out.println("Librarian Menu:");
                 System.out.println("1) View checked out books");
@@ -99,8 +99,8 @@ public class Main {
                     case 2 -> Transactions.viewBooks();
 //                    case 3 ->
                     case 4 -> Transactions.totalFees();
-                    case 5->  Transactions.insert();
-//                    case 6->
+                    case 5 -> Transactions.insert();
+                    case 6 -> Transactions.removeBook();
 
 
 
