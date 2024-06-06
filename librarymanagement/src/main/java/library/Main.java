@@ -1,4 +1,6 @@
 package library;
+import java.sql.*;
+import java.util.Scanner;
 
 public class Main {
     private static final String url = "jdbc:mysql://localhost:3306/inventory_management";
@@ -6,7 +8,7 @@ public class Main {
     private static final String password = "rootroot";
     public static Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
 
         Class.forName("com.mysql.cj.jdbc.Driver");
 
@@ -51,7 +53,7 @@ public class Main {
             preparedStatement.setString(2, password);
             preparedStatement.setString(3, role);
             preparedStatement.executeUpdate();
-            System.out.println("Success. Created user!")
+            System.out.println("Success. Created user!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
