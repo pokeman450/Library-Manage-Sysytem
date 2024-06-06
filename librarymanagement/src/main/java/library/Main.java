@@ -36,11 +36,7 @@ public class Main {
             user = authenticateUser(connection, usern, passw);
 
             if (user != null) {
-                if ("librarian".equalsIgnoreCase(user.getRole())) {
-                    // Features for Librarian
-                } else {
-                    // Features for patrons
-                }
+                libraryMenu();
             } else {
                 System.out.println("Authentication failed. Try Again.");
             }
@@ -81,7 +77,7 @@ public class Main {
         }
         return null;
     }
-    public void libraryMenu(){
+    public static void libraryMenu(){
         int choice = 0;
         //the choices if the user is an admin
         if(user.getRole().equals("librarian")){
@@ -92,8 +88,8 @@ public class Main {
                 System.out.println("3) View overdue Books");
                 System.out.println("4) Total fees");
                 System.out.println("5) exit");
-//                choice = scanner.nextInt();
-//                scanner.nextLine();
+                choice = scanner.nextInt();
+                scanner.nextLine();
 //                switch(choice){
 //                    case 1 ->
 //                    case 2 ->
@@ -104,21 +100,22 @@ public class Main {
 //                }
             }while(choice!= 5);
 
-        }else{
+        }else {
             //choices if the user isnt an librarian
-            do{
+            do {
                 System.out.println("User Menu:");
                 System.out.println("1) View checked out books");
                 System.out.println("2) View fees");
                 System.out.println("3) Check out book");
-
-//                choice = myObj.nextInt();
-//                myObj.nextLine();
+                System.out.println("4) Exit");
+                choice = scanner.nextInt();
+                scanner.nextLine();
 //                switch(choice){
 //                    case 1 ->
 //                    case 2 ->
 //                }
-            }while(choice!= 3);
+            } while (choice != 4);
+        }
     }
 
 }
