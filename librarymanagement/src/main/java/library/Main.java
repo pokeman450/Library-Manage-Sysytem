@@ -114,12 +114,68 @@ public class Main {
                 System.out.println("4) Exit");
                 choice = scanner.nextInt();
                 scanner.nextLine();
-//                switch(choice){
-//                    case 1 ->
-//                    case 2 ->
-//                }
+                switch(choice){
+                    case 1 ->viewCheckedOutBooks(connection, user.getId());
+                    case 2 -> viewFees(connection, user.getId());
+                }
             } while (choice != 4);
         }
     }
+
+    public static void viewCheckedOutBooks(Connection connection, int userId) {
+        String readQuery = "SELECT * FROM books WHERE userId = ?";
+        try (PreparedStatement createStatement = connection.prepareStatement(readQuery)) {
+            createStatement.setInt(1, userId);
+
+            try (ResultSet resultSet = createStatement.executeQuery()) {
+                while (resultSet.next() ) {
+                    System.out.print("Name: " + resultSet.getString("name"));
+                    System.out.print(" Author: " + resultSet.getString("author"));
+                    System.out.print(" Genre: " + resultSet.getString("genre"));
+                    System.out.println(" Fee: " + resultSet.getDouble("fee"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static void viewFees(Connection connection, int userId) {
+        double totalFees = 0;
+        int count = 0;
+        LocalDateTime now = LocalDateTime.now();
+        String readQuery = "SELECT * FROM books WHERE userId = ?";
+
+        try (PreparedStatement createStatement = connection.prepareStatement(readQuery)) {
+            createStatement.setInt(1, userId);
+
+            try (ResultSet resultSet = createStatement.executeQuery()) {
+                if (resultSet.next() ) {
+                    if(resultSet.getTimestamp("checkout")!= null){
+                        //if it is then we get the checkout datetime
+                        LocalDateTime time = resultSet.getTimestamp("checkout").toLocalDateTime();
+                        long difference = ChronoUnit.DAYS.between(time, now);
+                        //then we get the difference
+                        //once we get the difference we calculate how much the person owes
+                        if(difference >=6){
+                            count+=1;
+                            if(difference == 6){
+                                totalFees+= resultSet.getInt("fee");
+                            }else{
+                                totalFees+=resultSet.getDouble("fee")*(difference-6);
+                            }
+
+                        }
+                    }
+
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 
 }
