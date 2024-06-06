@@ -70,6 +70,7 @@ public class Main {
                 user.setUsername(resultSet.getString("username"));
                 user.setPassword(resultSet.getString("password"));
                 user.setRole(resultSet.getString("role"));
+                user.setUrl(url);
                 return user;
             }
         } catch (SQLException e) {
@@ -77,7 +78,7 @@ public class Main {
         }
         return null;
     }
-    public static void libraryMenu(){
+    public static void libraryMenu() throws SQLException, ClassNotFoundException {
         int choice = 0;
         //the choices if the user is an admin
         if(user.getRole().equals("librarian")){
@@ -90,14 +91,14 @@ public class Main {
                 System.out.println("5) exit");
                 choice = scanner.nextInt();
                 scanner.nextLine();
-//                switch(choice){
+                switch(choice){
 //                    case 1 ->
-//                    case 2 ->
+                    case 2 -> Transactions.viewBooks();
 //                    case 3 ->
-//                    case 4 ->
-//                    case 5 ->
-//
-//                }
+                    case 4 -> Transactions.totalFees();
+
+
+                }
             }while(choice!= 5);
 
         }else {
