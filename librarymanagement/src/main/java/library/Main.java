@@ -1,6 +1,8 @@
 package library;
 import java.sql.*;
 import java.util.Scanner;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class Main {
     private static final String url = "jdbc:mysql://localhost:3306/library";
@@ -37,12 +39,12 @@ public class Main {
             user = authenticateUser(connection, usern, passw);
 
             if (user != null) {
-                libraryMenu();
+                libraryMenu(connection);
             } else {
                 System.out.println("Authentication failed. Try Again.");
             }
         }
-
+`
     }
 
     public static void createUser(Connection connection, String username1, String password1, String role) {
