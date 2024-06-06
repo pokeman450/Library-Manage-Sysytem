@@ -44,7 +44,7 @@ public class Main {
                 System.out.println("Authentication failed. Try Again.");
             }
         }
-`
+
     }
 
     public static void createUser(Connection connection, String username1, String password1, String role) {
@@ -81,7 +81,7 @@ public class Main {
         }
         return null;
     }
-    public static void libraryMenu() throws SQLException, ClassNotFoundException {
+    public static void libraryMenu(Connection connection) throws SQLException, ClassNotFoundException {
         int choice = 0;
         //the choices if the user is an admin
             if(user.getRole().equals("librarian")){
