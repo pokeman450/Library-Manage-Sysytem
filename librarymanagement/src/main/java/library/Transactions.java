@@ -123,4 +123,21 @@ public class Transactions {
 
 
      }
+    public static void  returnBook() throws ClassNotFoundException, SQLException {
+
+        System.out.print("Whats the Id of the book you want to checkout? ");
+        int bookId = Main.scanner.nextInt();
+        Main.scanner.nextLine();
+        //connects to the database
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection = DriverManager.getConnection(Main.connect.getUrl(), Main.connect.getUser(), Main.connect.getPass());
+        String  quiry = "update books set userId = null , checkout = null where bookId = ?" ;
+        PreparedStatement ps = connection.prepareStatement(quiry);
+        ps.setInt(1,bookId);
+        if(ps.executeUpdate() == 1){
+            System.out.println("updated successfully");
+        } else if (ps.executeUpdate() == 0) {
+            System.out.println("you entered wrong id number");
+        }
+    }
 }
