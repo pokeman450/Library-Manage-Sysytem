@@ -99,10 +99,13 @@ public class Main {
                     case 2 -> Transactions.viewBooks();
 //                    case 3 ->
                     case 4 -> Transactions.totalFees();
+                    case 5->  Transactions.insert();
+//                    case 6->
+
 
 
                 }
-            }while(choice!= 5);
+            }while(choice!= 7);
 
         }else {
             //choices if the user isnt an librarian

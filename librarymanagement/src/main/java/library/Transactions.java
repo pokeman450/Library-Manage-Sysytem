@@ -66,4 +66,34 @@ public class Transactions {
         System.out.println("There were "+count+" late books.");
         System.out.println("Total fee from all the late books are: "+totalFees+" dollars!");
     }
+    public static void insert() throws ClassNotFoundException, SQLException {
+        String title,author,genre;
+        int fee;
+        //asks what book they want to add, the title, author, and genre
+        System.out.print("Whats the book title? ");
+        title = Main.scanner.nextLine();
+        System.out.print("Whos the book by? ");
+        author = Main.scanner.nextLine();
+        System.out.print("Whats the books genre? ");
+        genre = Main.scanner.nextLine();
+
+        //connects to the database and adds it into the database
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection = DriverManager.getConnection(Main.connect.getUrl(), Main.connect.getUser(), Main.connect.getPass());
+        String insertSQL = "INSERT INTO books (userId, name, author, genre, checkout ,fee) VALUES (?, ?, ?, ?, ?, ?)";
+        PreparedStatement insert = connection.prepareStatement(insertSQL);
+        connection.setAutoCommit(false);
+        insert.setNull(1, Types.INTEGER);
+        insert.setString(2,title);
+        insert.setString(3,author);
+        insert.setString(4,genre);
+        insert.setNull(5,Types.TIMESTAMP);
+        insert.setInt(6,10);
+        insert.addBatch();
+
+        int[] addbooks = insert.executeBatch();
+        connection.commit();
+        System.out.println("Added a book into the library");
+
+    }
 }
