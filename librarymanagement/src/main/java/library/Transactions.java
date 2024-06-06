@@ -1,6 +1,8 @@
 package library;
 
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class Transactions {
     public static void viewBooks() throws SQLException, ClassNotFoundException {
@@ -26,11 +28,32 @@ public class Transactions {
     }
 
     public static void totalFees() throws SQLException, ClassNotFoundException {
-        int totalFees = 0;
+        double totalFees = 0;
+        int count = 0;
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/library", "root", "maplestory");
         Statement statement = connection.createStatement();
         String query = "select * from books";
         ResultSet result = statement.executeQuery(query);
+        LocalDateTime now = LocalDateTime.now();
+        while (result.next()){
+            if(result.getTimestamp("checkout")!= null){
+                LocalDateTime time = result.getTimestamp("checkout").toLocalDateTime();
+                long difference = ChronoUnit.DAYS.between(time,now);
+                System.out.println(difference);
+                if(difference >=6){
+                    count+=1;
+                    if(difference == 6){
+                        totalFees+= result.getInt("fee");
+                    }else{
+                        totalFees+=result.getDouble("fee")*(difference-6);
+                    }
+
+                }
+            }
+
+        }
+        System.out.println("There were "+count+" late books.");
+        System.out.println("Total fee from all the late books are: "+totalFees+" dollars!");
     }
 }
