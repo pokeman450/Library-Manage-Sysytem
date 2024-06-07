@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit;
 public class Main {
     private static final String url = "jdbc:mysql://localhost:3306/library";
     private static final String username = "root";
-    private static final String password = "blast450";
+    private static final String password = "maplestory";
     public static Scanner scanner = new Scanner(System.in);
     public static User user;
     public static Connect connect;
