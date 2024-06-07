@@ -47,6 +47,7 @@ public class Main {
 
     }
 
+
     public static void createUser(Connection connection, String username1, String password1, String role) {
         String insertQuery = "INSERT INTO user (username, password, role) VALUES (?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
