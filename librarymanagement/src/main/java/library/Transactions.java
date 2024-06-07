@@ -97,7 +97,8 @@ public class Transactions {
     }
 
     public static void viewCheckedoutBooks() throws SQLException, ClassNotFoundException {
-        Connection connection = DriverManager.getConnection(Main.connect.getUrl(), Main.connect.getUser(), Main.connect.getPass());        Statement statement = connection.createStatement();
+        Connection connection = DriverManager.getConnection(Main.connect.getUrl(), Main.connect.getUser(), Main.connect.getPass());        
+        Statement statement = connection.createStatement();
         //gets the books
         String query = "select * from books";
         ResultSet result = statement.executeQuery(query);
