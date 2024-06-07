@@ -126,7 +126,7 @@ public class Transactions {
         //gets the books
         String query = "select * from books";
         ResultSet result = statement.executeQuery(query);
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime current = LocalDateTime.now();
 
         //check if there are books in the table
         if(!result.isBeforeFirst()){
@@ -138,10 +138,10 @@ public class Transactions {
             //checks if its checked out
             if(result.getTimestamp("checkout")!= null){
                 //grab checkout datetime
-                LocalDateTime time = result.getTimestamp("checkout").toLocalDateTime();
-                long difference = ChronoUnit.DAYS.between(time,now);
-                //if the different is 6 days or longer, print the overdue book information
-                if(difference >=6){
+                LocalDateTime checkoutDate = result.getTimestamp("checkout").toLocalDateTime();
+                long timeGap = ChronoUnit.DAYS.between(checkoutDate,current);
+                //if the gap is 6 days or longer, print the overdue book information
+                if(timeGap >=6){
                     System.out.print("{Book Id: "+result.getInt("bookId"));
                     System.out.print(", Title: " + result.getString("name"));
                     System.out.print(", Author: " + result.getString("author"));
