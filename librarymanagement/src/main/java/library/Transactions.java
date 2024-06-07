@@ -68,7 +68,6 @@ public class Transactions {
     }
     public static void insert() throws ClassNotFoundException, SQLException {
         String title,author,genre;
-        int fee;
         //asks what book they want to add, the title, author, and genre
         System.out.print("Whats the book title? ");
         title = Main.scanner.nextLine();
