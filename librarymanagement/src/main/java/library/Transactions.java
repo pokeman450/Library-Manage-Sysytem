@@ -102,15 +102,16 @@ public class Transactions {
         //gets the books
         String query = "select * from books";
         ResultSet result = statement.executeQuery(query);
+        //check if there are books in the table
         if(!result.isBeforeFirst()){
-            //if theres no books then it will say
-            System.out.println("Theres no books");
+            System.out.println("There are no books");
             return;
         }
         System.out.println("Books currently checkedout: ");
         while (result.next()){
             //checks if its checked out
             if(result.getTimestamp("checkout")!= null){
+                //prints the checked out book information
                     System.out.print("{Book Id: "+result.getInt("bookId"));
                     System.out.print(", Title: " + result.getString("name"));
                     System.out.print(", Author: " + result.getString("author"));
@@ -128,8 +129,8 @@ public class Transactions {
         ResultSet result = statement.executeQuery(query);
         LocalDateTime now = LocalDateTime.now();
 
+        //check if there are books in the table
         if(!result.isBeforeFirst()){
-            //if theres no books then it will say
             System.out.println("There are no books");
             return;
         }
