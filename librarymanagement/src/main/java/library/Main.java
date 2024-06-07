@@ -1,181 +1,216 @@
-package inventory;
 
-
-import java.util.*;
+package library;
 import java.sql.*;
+import java.util.Scanner;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class Main {
-    
-    static Scanner scan = new Scanner(System.in);
-    static ProductDAO pd = new ProductDAO();
-    static SaleDAO sd = new SaleDAO();
-    static String username;
-    static String password;
-    public static void main(String[] args) {;
-        System.out.println("Enter usernamename: ");
-        username = scan.nextLine();
-        System.out.println("Enter password: ");
-        password = scan.nextLine();
-        try{
-            User user = UserDAO.authenticate(username,password);
-            if(username!= null){
-                System.out.println("Current user: "+user.getUser());
-                if(user.getRole().equals("admin")){
-                    adminMenu();
-                } else{
-                    userMenu();
-                }} else{
-                    System.out.println("Username or password is incorrect");
-                }
-            } catch(SQLException e){
-                e.printStackTrace();
+    private static final String url = "jdbc:mysql://localhost:3306/library";
+    private static final String username = "root";
+    private static final String password = "blast450";
+    public static Scanner scanner = new Scanner(System.in);
+    public static User user;
+    public static Connect connect;
+
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        connect = new Connect(url,username,password);
+
+        try(Connection connection = DriverManager.getConnection(url, username, password)) {
+            System.out.println("1. Sign up 2. Sign in ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if (choice == 1) {
+                System.out.println("Enter username: ");
+                String username1 = scanner.nextLine();
+                System.out.println("Enter password: ");
+                String password1 = scanner.nextLine();
+                System.out.println("Enter role: librarian / patron ");
+                String role = scanner.nextLine();
+                createUser(connection, username1, password1, role);
+            }
+            // Authentication
+            System.out.println("Enter username: ");
+            String usern = scanner.nextLine();
+            System.out.println("Enter password: ");
+            String passw = scanner.nextLine();
+            user = authenticateUser(connection, usern, passw);
+
+            if (user != null) {
+                libraryMenu(connection);
+            } else {
+                System.out.println("Authentication failed. Try Again.");
             }
         }
-    private static void adminMenu(){
-        while(true){
-            try {
-                while (true){
-                    System.out.println("""
-                    
-                    1) Add Product
-                    2) Search Product
-                    3) View Products
-                    4) Update Product
-                    5) Delete Product
-                    6) Record Sale
-                    7) Generate Sale Reports
-                    8) Generate Inventory Reports
-                    9) Exit
-                    """);
 
-                    int input = Integer.parseInt(scan.nextLine());
-                    switch (input){
-                        case 1 -> addProduct();
-                        case 2 -> searchProduct();
-                        case 3 -> viewProduct();
-                        case 4 -> updateProduct();
-                        case 5 -> deleteProduct();
-                        case 6 -> recordSale();
-                        case 7 -> generateSaleReport();
-                        case 8 -> generateInventorySaleReport();
-                        case 9 -> System.exit(0);
-                        default -> System.out.println("Invalid, Try 1-9");
+    }
+
+    public static void createUser(Connection connection, String username1, String password1, String role) {
+        String insertQuery = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            preparedStatement.setString(3, role);
+            preparedStatement.executeUpdate();
+            System.out.println("Success. Created user!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static User authenticateUser(Connection connection, String usern, String passw) {
+        // Verify if user exists with correct username and password
+        String readQuery = "Select * FROM user WHERE username = (?) AND password = (?)";
+        try(PreparedStatement preparedStatement = connection.prepareStatement(readQuery)) {
+            preparedStatement.setString(1, usern);
+            preparedStatement.setString(2, passw);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getInt("userId"));
+                user.setUsername(resultSet.getString("username"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(resultSet.getString("role"));
+
+                return user;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static void libraryMenu(Connection connection) throws SQLException, ClassNotFoundException {
+        int choice = 0;
+        //the choices if the user is an admin
+            if(user.getRole().equals("librarian")){
+            do{
+                System.out.println("Librarian Menu:");
+                System.out.println("1) View checked out books");
+                System.out.println("2) View books");
+                System.out.println("3) View overdue Books");
+                System.out.println("4) Total fees");
+                System.out.println("5) Add Books");
+                System.out.println("6) Remove Books");
+                System.out.println("7) exit");
+                choice = scanner.nextInt();
+                scanner.nextLine();
+                switch(choice){
+                    case 1 -> Transactions.viewCheckedoutBooks();
+                    case 2 -> Transactions.viewBooks();
+                    case 3 -> Transactions.viewOverdueBooks();
+                    case 4 -> Transactions.totalFees();
+                    case 5 -> Transactions.insert();
+                    case 6 -> Transactions.removeBook();
+
+
+
+                }
+            }while(choice!= 7);
+
+        }else {
+            //choices if the user isnt an librarian
+            do {
+                System.out.println("User Menu:");
+                System.out.println("1) View checked out books");
+                System.out.println("2) View fees");
+                System.out.println("3) Check out book");
+                System.out.println("4) Exit");
+                choice = scanner.nextInt();
+                scanner.nextLine();
+                switch(choice){
+                    case 1 ->viewCheckedOutBooks(connection, user.getId());
+                    case 2 -> viewFees(connection, user.getId());
+                    case 3 -> checkoutBook(connection);
+                }
+            } while (choice != 4);
+        }
+    }
+
+    public static void viewCheckedOutBooks(Connection connection, int userId) {
+        String readQuery = "SELECT * FROM books WHERE userId = ? AND books.checkout IS NOT NULL";
+        // Get all books that match userId with logged in user and checkout is not null
+        try (PreparedStatement createStatement = connection.prepareStatement(readQuery)) {
+            createStatement.setInt(1, userId);
+
+            try (ResultSet resultSet = createStatement.executeQuery()) {
+                while (resultSet.next() ) {
+                    System.out.print("Name: " + resultSet.getString("name"));
+                    System.out.print(" Author: " + resultSet.getString("author"));
+                    System.out.print(" Genre: " + resultSet.getString("genre"));
+                    System.out.println(" Fee: " + resultSet.getDouble("fee"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static void viewFees(Connection connection, int userId) {
+        double totalFees = 0;
+        int count = 0;
+        LocalDateTime now = LocalDateTime.now();
+        String readQuery = "SELECT * FROM books WHERE userId = ?";
+
+        try (PreparedStatement createStatement = connection.prepareStatement(readQuery)) {
+            createStatement.setInt(1, userId);
+
+            try (ResultSet resultSet = createStatement.executeQuery()) {
+                while (resultSet.next() ) {
+                    if(resultSet.getTimestamp("checkout")!= null){
+                        //if it is then we get the checkout datetime
+                        LocalDateTime time = resultSet.getTimestamp("checkout").toLocalDateTime();
+                        long difference = ChronoUnit.DAYS.between(time, now);
+                        //then we get the difference
+                        //once we get the difference we calculate how much the person owes
+                        if(difference >=6){
+                            count+=1;
+                            if(difference == 6){
+                                totalFees+= resultSet.getInt("fee");
+                            }else{
+                                totalFees+=resultSet.getDouble("fee")*(difference-6);
+                            }
+
+                        }
                     }
+
                 }
-            } catch (NumberFormatException e){
-                System.out.println("Invalid, Try number 1-9");
+                System.out.println("There were "+count+" late books.");
+                System.out.println("Total fee from all the late books are: $"+totalFees+" dollars!");
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
-    // If role is admin load user console
-    private static void userMenu(){
-        while (true){
-            try {
-                while (true){
-                    System.out.println("""
-                    
-                    1) Search Product
-                    2) View Products
-                    3) Record Sale
-                    4) Exit
-                    """);
 
-                    int input = Integer.parseInt(scan.nextLine());
-                    switch (input){
-                        case 1 -> searchProduct();
-                        case 2 -> viewProduct();
-                        case 3 -> recordSale();
-                        case 4 -> System.exit(0);
-                        default -> System.out.println("Invalid, Try 1-4");
+    public static void checkoutBook(Connection connection) {
+        System.out.println("Enter the book name to check out: ");
+        String bookName = scanner.nextLine();
+        String readQuery = "SELECT * FROM books WHERE name = ? AND userId IS NULL";
+        String updateQuery = "UPDATE books SET userId = ?, checkout = ? WHERE name = ? AND userId IS NULL";
+
+        try (PreparedStatement readStatement = connection.prepareStatement(readQuery)) {
+            readStatement.setString(1, bookName);
+            try (ResultSet resultSet = readStatement.executeQuery()) {
+                // Checks if book entered is available or exists
+                if (resultSet.next()) {
+                    try (PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
+                        // Updates book userId to logged in user and checkout date, time
+                        updateStatement.setInt(1, user.getId());
+                        updateStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                        updateStatement.setString(3, bookName);
+                        updateStatement.executeUpdate();
+                        System.out.println("Book checked out successfully!");
                     }
+                } else {
+                    System.out.println("Book not available for checkout or does not exist.");
                 }
-            } catch (NumberFormatException e){
-                System.out.println("Invalid, Try number 1-4");
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-    }
-    // Print out the report joined between sales and products
-    private static void generateInventorySaleReport() {
-        ArrayList<String> saleProducts = sd.getSaleInventoryReport();
-        System.out.println("\n--== Currently Viewing All Sales of Products==--");
-        for (String saleProduct : saleProducts){
-            System.out.println(saleProduct);
-        }
-    }
-
-    // Print out sale records
-    private static void generateSaleReport() {
-        ArrayList<Sale> sales = sd.getSalesReport();
-        System.out.println("\n--== Currently Viewing All Sales ==--");
-        for (Sale sale : sales){
-            System.out.println(sale);
-        }
-    }
-
-    // Allow user to add in sale, it will take away from quality of product
-    private static void recordSale() {
-        System.out.println("\n--== Currently Recording Sale ==--");
-        System.out.println("Enter Product Id");
-        int id = Integer.parseInt(scan.nextLine());
-        System.out.println("Enter Product Quantity");
-        int quantity = Integer.parseInt(scan.nextLine());
-        sd.RecordSale(id,quantity);
-    }
-
-    // Delete Product
-    private static void deleteProduct() {
-        System.out.println("\n--== Currently Deleting Product ==--");
-        System.out.println("Enter Product Name");
-        String name = scan.nextLine();
-        pd.deleteProduct(name);
-    }
-
-    // Update product based on ID
-    private static void updateProduct() {
-        System.out.println("\n--== Currently Updating Product ==--");
-        System.out.println("Enter Product Id");
-        int id = Integer.parseInt(scan.nextLine());
-        System.out.println("Enter Product Name");
-        String name = scan.nextLine();
-        System.out.println("Enter Product Quantity");
-        int quantity = Integer.parseInt(scan.nextLine());
-        System.out.println("Enter Product Price");
-        double price = Double.parseDouble(scan.nextLine());
-        pd.updateProduct(id,name,quantity,price);
-        if (pd.getProduct(name) != null){
-            System.out.println(pd.getProduct(name));
-        }
-    }
-
-    // Print out inventory
-    private static void viewProduct() {
-        ArrayList<Product> products = pd.getAllProducts();
-        System.out.println("All Products:");
-        for (Product product : products){
-            System.out.println(product);
-        }
-    }
-
-    // Search for a specific product based on name
-    private static void searchProduct() {
-        System.out.println("Searching for product");
-        System.out.println("Enter Product Name");
-        String name = scan.nextLine();
-        if (pd.getProduct(name) != null){
-            System.out.println(pd.getProduct(name));
-        }
-    }
-
-    // Add new product to inventory
-    private static void addProduct() {
-        System.out.println("\n--== Currently Adding Product ==--");
-        System.out.println("Enter Product Name");
-        String name = scan.nextLine();
-        System.out.println("Enter Product Quantity");
-        int quantity = Integer.parseInt(scan.nextLine());
-        System.out.println("Enter Product Price");
-        double price = Double.parseDouble(scan.nextLine());
-        pd.addProduct(new Product(0,name,quantity,price));
     }
 
 }
