@@ -47,11 +47,12 @@ public class Main {
 
     }
 
-    public static void createUser(Connection connection, String username, String password, String role) {
+
+    public static void createUser(Connection connection, String username1, String password1, String role) {
         String insertQuery = "INSERT INTO user (username, password, role) VALUES (?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
+            preparedStatement.setString(1, username1);
+            preparedStatement.setString(2, password1);
             preparedStatement.setString(3, role);
             preparedStatement.executeUpdate();
             System.out.println("Success. Created user!");
