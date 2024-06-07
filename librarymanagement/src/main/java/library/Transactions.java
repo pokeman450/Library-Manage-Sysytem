@@ -64,7 +64,7 @@ public class Transactions {
 
         }
         System.out.println("There were "+count+" late books.");
-        System.out.println("Total fee from all the late books are: "+totalFees+" dollars!");
+        System.out.println("Total fee from all the late books are: $"+totalFees+" dollars!");
     }
     public static void insert() throws ClassNotFoundException, SQLException {
         String title,author,genre;
@@ -96,6 +96,63 @@ public class Transactions {
         System.out.println("Added a book into the library");
 
     }
+
+    public static void viewCheckedoutBooks() throws SQLException, ClassNotFoundException {
+        Connection connection = DriverManager.getConnection(Main.connect.getUrl(), Main.connect.getUser(), Main.connect.getPass());        Statement statement = connection.createStatement();
+        //gets the books
+        String query = "select * from books";
+        ResultSet result = statement.executeQuery(query);
+        if(!result.isBeforeFirst()){
+            //if theres no books then it will say
+            System.out.println("Theres no books");
+            return;
+        }
+        System.out.println("Books currently checkedout: ");
+        while (result.next()){
+            //checks if its checked out
+            if(result.getTimestamp("checkout")!= null){
+                    System.out.print("{Book Id: "+result.getInt("bookId"));
+                    System.out.print(", Title: " + result.getString("name"));
+                    System.out.print(", Author: " + result.getString("author"));
+                    System.out.print(", Genre: " + result.getString("genre"));
+                    System.out.print(", Checked out: " + result.getString("checkout"));
+                    System.out.print(",  fee: " + result.getString("fee"));
+                    System.out.println("}");
+            }
+        }
+    }
+    public static void viewOverdueBooks() throws SQLException, ClassNotFoundException {
+        Connection connection = DriverManager.getConnection(Main.connect.getUrl(), Main.connect.getUser(), Main.connect.getPass());        Statement statement = connection.createStatement();
+        //gets the books
+        String query = "select * from books";
+        ResultSet result = statement.executeQuery(query);
+        LocalDateTime now = LocalDateTime.now();
+
+        if(!result.isBeforeFirst()){
+            //if theres no books then it will say
+            System.out.println("There are no books");
+            return;
+        }
+        System.out.println("ATTENTION. The following are overdue: ");
+        while (result.next()){
+            //checks if its checked out
+            if(result.getTimestamp("checkout")!= null){
+                //grab checkout datetime
+                LocalDateTime time = result.getTimestamp("checkout").toLocalDateTime();
+                long difference = ChronoUnit.DAYS.between(time,now);
+                //if the different is 6 days or longer, print the overdue book information
+                if(difference >=6){
+                    System.out.print("{Book Id: "+result.getInt("bookId"));
+                    System.out.print(", Title: " + result.getString("name"));
+                    System.out.print(", Author: " + result.getString("author"));
+                    System.out.print(", Genre: " + result.getString("genre"));
+                    System.out.print(", Checked out: " + result.getString("checkout"));
+                    System.out.print(",  fee: " + result.getString("fee"));
+                    System.out.println("}");
+                }
+            }
+        }
+    }
      public static void removeBook() throws ClassNotFoundException, SQLException {
         //asks for the books id
         System.out.print("Whats the Id of the book you want to remove? ");
@@ -123,21 +180,4 @@ public class Transactions {
 
 
      }
-    public static void  returnBook() throws ClassNotFoundException, SQLException {
-
-        System.out.print("Whats the Id of the book you want to checkout? ");
-        int bookId = Main.scanner.nextInt();
-        Main.scanner.nextLine();
-        //connects to the database
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection connection = DriverManager.getConnection(Main.connect.getUrl(), Main.connect.getUser(), Main.connect.getPass());
-        String  quiry = "update books set userId = null , checkout = null where bookId = ?" ;
-        PreparedStatement ps = connection.prepareStatement(quiry);
-        ps.setInt(1,bookId);
-        if(ps.executeUpdate() == 1){
-            System.out.println("updated successfully");
-        } else if (ps.executeUpdate() == 0) {
-            System.out.println("you entered wrong id number");
-        }
-    }
 }
